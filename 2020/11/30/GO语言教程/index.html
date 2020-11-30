@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="19.4 用户界面：web 服务端（本节代码见 goto_v1&#x2F;main.go。） 我们尚未编写启动程序的必要函数。它们（总是）类似 C，C++ 或 Java 中的 main() 函数，我们的 web 服务器由它启动，例如用如下命令在本地 8080 端口启动 web 服务器： 1http.ListenAndServe(&quot;:8080&quot;, nil)  （web 服务器的功能来自于 http 包，15">
+<meta property="og:type" content="article">
+<meta property="og:title" content="GO语言教程">
+<meta property="og:url" content="http://yoursite.com/2020/11/30/GO%E8%AF%AD%E8%A8%80%E6%95%99%E7%A8%8B/index.html">
+<meta property="og:site_name" content="Rainzee&#39;s">
+<meta property="og:description" content="19.4 用户界面：web 服务端（本节代码见 goto_v1&#x2F;main.go。） 我们尚未编写启动程序的必要函数。它们（总是）类似 C，C++ 或 Java 中的 main() 函数，我们的 web 服务器由它启动，例如用如下命令在本地 8080 端口启动 web 服务器： 1http.ListenAndServe(&quot;:8080&quot;, nil)  （web 服务器的功能来自于 http 包，15">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://yoursite.com/Users/rainzee/Downloads/the-way-to-go_ZH_CN-master/eBook/images/19.4_fig19.1.jpg">
+<meta property="og:image" content="http://yoursite.com/Users/rainzee/Downloads/the-way-to-go_ZH_CN-master/eBook/images/19.4_fig19.2.png">
+<meta property="og:image" content="http://yoursite.com/Users/rainzee/Downloads/the-way-to-go_ZH_CN-master/eBook/images/19.4_fig19.3.jpg">
+<meta property="og:image" content="http://yoursite.com/Users/rainzee/Downloads/the-way-to-go_ZH_CN-master/eBook/images/19.4_fig19.4.jpg">
+<meta property="article:published_time" content="2020-11-30T02:12:03.000Z">
+<meta property="article:modified_time" content="2020-11-30T02:13:13.143Z">
+<meta property="article:author" content="Rainzee Wang">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/Users/rainzee/Downloads/the-way-to-go_ZH_CN-master/eBook/images/19.4_fig19.1.jpg">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/favicon.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>GO语言教程</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/projects_url">Projects</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" href="/2020/06/05/%E6%B5%8B%E8%AF%95/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/11/30/GO%E8%AF%AD%E8%A8%80%E6%95%99%E7%A8%8B/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/11/30/GO%E8%AF%AD%E8%A8%80%E6%95%99%E7%A8%8B/&text=GO语言教程" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/11/30/GO%E8%AF%AD%E8%A8%80%E6%95%99%E7%A8%8B/&title=GO语言教程" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/11/30/GO%E8%AF%AD%E8%A8%80%E6%95%99%E7%A8%8B/&is_video=false&description=GO语言教程" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=GO语言教程&body=Check out this article: http://yoursite.com/2020/11/30/GO%E8%AF%AD%E8%A8%80%E6%95%99%E7%A8%8B/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/11/30/GO%E8%AF%AD%E8%A8%80%E6%95%99%E7%A8%8B/&title=GO语言教程" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/11/30/GO%E8%AF%AD%E8%A8%80%E6%95%99%E7%A8%8B/&title=GO语言教程" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/11/30/GO%E8%AF%AD%E8%A8%80%E6%95%99%E7%A8%8B/&title=GO语言教程" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/11/30/GO%E8%AF%AD%E8%A8%80%E6%95%99%E7%A8%8B/&title=GO语言教程" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/11/30/GO%E8%AF%AD%E8%A8%80%E6%95%99%E7%A8%8B/&name=GO语言教程&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/11/30/GO%E8%AF%AD%E8%A8%80%E6%95%99%E7%A8%8B/&t=GO语言教程" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#19-4-用户界面：web-服务端"><span class="toc-number">1.</span> <span class="toc-text">19.4 用户界面：web 服务端</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#编译和运行"><span class="toc-number">1.1.</span> <span class="toc-text">编译和运行</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#测试该程序"><span class="toc-number">1.2.</span> <span class="toc-text">测试该程序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#链接"><span class="toc-number">1.3.</span> <span class="toc-text">链接</span></a></li></ol></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        GO语言教程
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">Rainzee Wang</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-11-30T02:12:03.000Z" itemprop="datePublished">2020-11-30</time>
+        
+      
+    </div>
+
+
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h1 id="19-4-用户界面：web-服务端"><a href="#19-4-用户界面：web-服务端" class="headerlink" title="19.4 用户界面：web 服务端"></a>19.4 用户界面：web 服务端</h1><p>（本节代码见 <a href="examples/chapter_19/goto_v1/main.go">goto_v1/main.go</a>。）</p>
+<p>我们尚未编写启动程序的必要函数。它们（总是）类似 C，C++ 或 Java 中的 <code>main()</code> 函数，我们的 web 服务器由它启动，例如用如下命令在本地 8080 端口启动 web 服务器：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http.ListenAndServe(<span class="string">":8080"</span>, <span class="literal">nil</span>)</span><br></pre></td></tr></table></figure>
+
+<p>（web 服务器的功能来自于 <code>http</code> 包，<a href="15.0.md">15 章</a> 做了深入介绍）。web 服务器会在一个无限循环中监听到来的请求，但我们必须定义针对这些请求，服务器该如何响应。可以用被称为 HTTP 处理器的 <code>HandleFunc</code> 函数来办到，例如代码：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http.HandleFunc(<span class="string">"/add"</span>, Add)</span><br></pre></td></tr></table></figure>
+
+<p>如此，每个以 <code>/add</code> 结尾的请求都会调用 <code>Add</code> 函数（尚未完成）。</p>
+<p>程序有两个 HTTP 处理器：</p>
+<ul>
+<li><code>Redirect</code>，用于对短 URL 重定向</li>
+<li><code>Add</code>，用于处理新提交的 URL</li>
+</ul>
+<p>示意图：</p>
+<p><img src="/Users/rainzee/Downloads/the-way-to-go_ZH_CN-master/eBook/images/19.4_fig19.1.jpg" alt=""></p>
+<p>最简单的 <code>main()</code> 函数类似这样：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	http.HandleFunc(<span class="string">"/"</span>, Redirect)</span><br><span class="line">	http.HandleFunc(<span class="string">"/add"</span>, Add)</span><br><span class="line">	http.ListenAndServe(<span class="string">":8080"</span>, <span class="literal">nil</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>对 <code>/add</code> 的请求由 <code>Add</code> 处理器处理，所有其他请求会被 <code>Redirect</code> 处理器处理。处理函数从到来的请求（一个类型为 <code>*http.Request</code> 的变量）中获取信息，然后产生响应并写入 <code>http.ResponseWriter</code> 类型变量 <code>w</code>。</p>
+<p><code>Add</code> 函数必须做的事有：</p>
+<ol>
+<li>读取长 URL，即：用 <code>r.FormValue(&quot;url&quot;)</code> 从 HTML 表单提交的 HTTP 请求中读取 URL</li>
+<li>使用 store 上的 <code>Put</code> 方法存储长 URL</li>
+<li>将对应的短 URL 发送给用户</li>
+</ol>
+<p>每个需求都转化为一行代码：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Add</span><span class="params">(w http.ResponseWriter, r *http.Request)</span></span> &#123;</span><br><span class="line">	url := r.FormValue(<span class="string">"url"</span>)</span><br><span class="line">	key := store.Put(url)</span><br><span class="line">	fmt.Fprintf(w, <span class="string">"http://localhost:8080/%s"</span>, key)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里 <code>fmt</code> 包的 <code>Fprintf</code> 函数用来替换字符串中的关键字 <code>%s</code>，然后将结果作为响应发送回客户端。注意 <code>Fprintf</code> 把数据写到了 <code>ResponseWriter</code> 中，其实 <code>Fprintf</code> 可以将数据写到任何实现了 <code>io.Writer</code> 的数据结构，即该结构实现了 <code>Write</code> 方法。Go 中 <code>io.Writer</code> 称为接口，可见 <code>Fprintf</code> 利用接口变得十分通用，可以对很多不同的类型写入数据。Go 中接口的使用十分普遍，它使代码更通用（见 <a href="11.0.md">11 章</a>）。</p>
+<p>还需要一个表单，仍然可以用 <code>Fprintf</code> 来输出，这次将常量写入 <code>w</code>。让我们来修改 <code>Add</code>，当未指定 URL 时显示 HTML 表单：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Add</span><span class="params">(w http.ResponseWriter, r *http.Request)</span></span> &#123;</span><br><span class="line">	url := r.FormValue(<span class="string">"url"</span>)</span><br><span class="line">	<span class="keyword">if</span> url == <span class="string">""</span> &#123;</span><br><span class="line">		fmt.Fprint(w, AddForm)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	key := store.Put(url)</span><br><span class="line">	fmt.Fprintf(w, <span class="string">"http://localhost:8080/%s"</span>, key)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> AddForm = <span class="string">`</span></span><br><span class="line"><span class="string">&lt;form method="POST" action="/add"&gt;</span></span><br><span class="line"><span class="string">URL: &lt;input type="text" name="url"&gt;</span></span><br><span class="line"><span class="string">&lt;input type="submit" value="Add"&gt;</span></span><br><span class="line"><span class="string">&lt;/form&gt;</span></span><br><span class="line"><span class="string">`</span></span><br></pre></td></tr></table></figure>
+
+<p>在那种情况下，发送字符串常量 <code>AddForm</code> 到客户端，它是 html 表单，包含一个 <code>url</code> 输入域和一个提交按钮，点击后发送 POST 请求到 <code>/add</code>。这样 <code>Add</code> 处理函数被再次调用，此时 <code>url</code> 的值来自文本域。（<code>``</code> 用来创建原始字符串，否则按惯例 <code>&quot;&quot;</code> 将成为字符串边界。）</p>
+<p><code>Redirect</code> 函数在 HTTP 请求路径中找到键（短 URL 的键是请求路径去除首字符，在 Go 中可以写为 <code>[1:]</code>。例如请求 “/abc”，键就是 “abc”），用 <code>Get</code> 函数从 <code>store</code> 检索到对应的长 URL，对用户发送 HTTP 重定向。如果没找到 URL，发送 404 “Not Found” 错误取而代之：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Redirect</span><span class="params">(w http.ResponseWriter, r *http.Request)</span></span> &#123;</span><br><span class="line">	key := r.URL.Path[<span class="number">1</span>:]</span><br><span class="line">	url := store.Get(key)</span><br><span class="line">	<span class="keyword">if</span> url == <span class="string">""</span> &#123;</span><br><span class="line">		http.NotFound(w, r)</span><br><span class="line">		<span class="keyword">return</span></span><br><span class="line">	&#125;</span><br><span class="line">	http.Redirect(w, r, url, http.StatusFound)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>（<code>http.NotFound</code> 和 <code>http.Redirect</code> 是发送通用 HTTP 响应的工具函数。）</p>
+<p>我们已经完整地遍历了 <a href="examples/chapter_19/goto_v1">goto_v1</a> 的代码。</p>
+<h2 id="编译和运行"><a href="#编译和运行" class="headerlink" title="编译和运行"></a>编译和运行</h2><p>可执行程序已包含在示例代码下，如果你想立即测试可以跳过本节。其中包含 3 个 go 源文件和一个 Makefile 文件，通过它应用可以被编译和链接，只须如下操作：</p>
+<ul>
+<li><strong>Linux 和 OSX 平台：</strong> 在终端窗口源码目录下启动 <code>make</code> 命令，或在 LiteIDE 中构建项目。</li>
+<li><strong>Windows 平台：</strong> 启动 MINGW 环境，步骤为：开始菜单，所有程序，MinGW，MinGW Shell（见 <a href="02.5.md">2.5.5 节</a>），在命令行窗口输入 <code>make</code> 并回车，源代码被编译并链接为原生 exe 可执行程序。</li>
+</ul>
+<p>生成内容为可执行程序，Linux/OS X 下为 <code>goto</code>，Windows 下为 <code>goto.exe</code>。</p>
+<p>要启动并运行 web 服务器，那么：</p>
+<ul>
+<li><strong>Linux 和 OSX 平台：</strong> 输入命令 <code>./goto</code>。</li>
+<li><strong>Windows 平台：</strong> 从 Go IDE 启动程序（如果 Windows 防火墙阻止程序启动，设置允许该程序）</li>
+</ul>
+<h2 id="测试该程序"><a href="#测试该程序" class="headerlink" title="测试该程序"></a>测试该程序</h2><p>打开浏览器并请求  url：<code>http://localhost:8080/add</code></p>
+<p>这会激活 <code>Add</code> 处理函数。请求还未包含 url 变量，所以响应会输出 html 表单询问输入：</p>
+<p><img src="/Users/rainzee/Downloads/the-way-to-go_ZH_CN-master/eBook/images/19.4_fig19.2.png" alt=""></p>
+<p>添加一个长 URL 以获取等价的缩短版本，例如 <code>http://golang.org/pkg/bufio/#Writer</code>，然后单击按钮。应用会为你产生一个短 URL 并打印出来，例如 <code>http://
+localhost:8080/2</code>。</p>
+<p><img src="/Users/rainzee/Downloads/the-way-to-go_ZH_CN-master/eBook/images/19.4_fig19.3.jpg" alt=""></p>
+<p>复制该 URL 并在浏览器地址栏粘贴以发出请求，现在轮到 <code>Redirect</code> 处理函数上场了，对应长 URL 的页面被显示了出来。</p>
+<p><img src="/Users/rainzee/Downloads/the-way-to-go_ZH_CN-master/eBook/images/19.4_fig19.4.jpg" alt=""></p>
+<h2 id="链接"><a href="#链接" class="headerlink" title="链接"></a>链接</h2><ul>
+<li><a href="directory.md">目录</a></li>
+<li>上一节：<a href="19.3.md">数据结构</a></li>
+<li>下一节：[持久化存储：gob](</li>
+</ul>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/projects_url">Projects</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#19-4-用户界面：web-服务端"><span class="toc-number">1.</span> <span class="toc-text">19.4 用户界面：web 服务端</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#编译和运行"><span class="toc-number">1.1.</span> <span class="toc-text">编译和运行</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#测试该程序"><span class="toc-number">1.2.</span> <span class="toc-text">测试该程序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#链接"><span class="toc-number">1.3.</span> <span class="toc-text">链接</span></a></li></ol></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=http://yoursite.com/2020/11/30/GO%E8%AF%AD%E8%A8%80%E6%95%99%E7%A8%8B/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=http://yoursite.com/2020/11/30/GO%E8%AF%AD%E8%A8%80%E6%95%99%E7%A8%8B/&text=GO语言教程" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=http://yoursite.com/2020/11/30/GO%E8%AF%AD%E8%A8%80%E6%95%99%E7%A8%8B/&title=GO语言教程" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=http://yoursite.com/2020/11/30/GO%E8%AF%AD%E8%A8%80%E6%95%99%E7%A8%8B/&is_video=false&description=GO语言教程" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=GO语言教程&body=Check out this article: http://yoursite.com/2020/11/30/GO%E8%AF%AD%E8%A8%80%E6%95%99%E7%A8%8B/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=http://yoursite.com/2020/11/30/GO%E8%AF%AD%E8%A8%80%E6%95%99%E7%A8%8B/&title=GO语言教程" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=http://yoursite.com/2020/11/30/GO%E8%AF%AD%E8%A8%80%E6%95%99%E7%A8%8B/&title=GO语言教程" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=http://yoursite.com/2020/11/30/GO%E8%AF%AD%E8%A8%80%E6%95%99%E7%A8%8B/&title=GO语言教程" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=http://yoursite.com/2020/11/30/GO%E8%AF%AD%E8%A8%80%E6%95%99%E7%A8%8B/&title=GO语言教程" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=http://yoursite.com/2020/11/30/GO%E8%AF%AD%E8%A8%80%E6%95%99%E7%A8%8B/&name=GO语言教程&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=http://yoursite.com/2020/11/30/GO%E8%AF%AD%E8%A8%80%E6%95%99%E7%A8%8B/&t=GO语言教程" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2016-2020
+    Rainzee Wang
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+         
+          <li><a href="/projects_url">Projects</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>
